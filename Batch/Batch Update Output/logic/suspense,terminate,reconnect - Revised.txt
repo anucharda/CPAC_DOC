@@ -22,6 +22,30 @@ Response File .ok หรือ .err จะมีชื่อไฟล์ .dat (�
          	WHERE BATCH_ID = ?
 (ไม่ต้อง Update BATCH_END_DTM เพราะเป็นวันเวลาเสร็จสิ้นการ Generate Batch File กรณี Outbound เท่านั้น)
 
+--> กรณี file name ใน .ok กับ .err ไม่เท่ากันตี err มั้ย
+--> กรณีถ้า file แล้วได้ BATCH_ID เป็นว่างเคสนี้ให้ write log error แล้วทำ file sync ตัวใหม่เลยหรือไม่
+
+3. วนข้อมูลจากไฟล์ทำทีละ Record
+   3.1 ดึงข้อมูลจาก table CL_ORDER_TREATMENT และ CL_ORDER เพื่อเก็บค่า ORDER_ID,BA_NO,MOBILE_NO,TREATMENT_ID,BATCH_ID ไว้ใน resultList ไว้สำหรับ Update CL_TREATMENT และ CL_BATCH โดยใช้ Query
+ 	SELECT A.ORDER_ID, A.BA_NO, A.MOBILE_NO, A.BATCH_ID, B.TREATMENT_ID
+	FROM CL_ORDER A, CL_ORDER_TREATMEMT B
+	WHERE A.ORDER_ID = B.ORDER_ID
+	AND A.ACTION_STATUS = 3 -- In Progress
+	AND A.BATCH_ID = ? จากข้อ 2
+	AND A.MOBILE_NO= จากไฟล์ 
+   3.2 ตรวจสอบผลลัพธ์ที่ได้จากข้อ 3.1 ถ้ามากกว่า 1 record จึงทำขั้นตอนต่อไป ถ้าน้อยกว่า write log ไว้
+   3.3 ทำการ udpate action_status,ACTION_STATUS_DTM,SFF_ORDER_NO,ACTION_REMARK ใน Table CL_ORDER โดยใช้ Query
+  	UPDATE dbo.CL_ORDER
+  	SET LAST_UPD = getdate(),
+     	LAST_UPD_BY ='XXX' -- จะแจ้งอีกทีว่าให้ใช้ Username อะไรในกรณี Create/Update by System
+      	ACTION_STATUS = 4 (จากไฟล์ Success),6(จากไฟล์ Fail),
+      	ACTION_REMARK = error (จากไฟล์ Fail),
+      	ACTION_STATUS_DTM =getdate(),
+      	SFF_ORDER_NO = จากไฟล์
+   	WHERE MOBILE_NO = จากไฟล์
+   
+   
+   
 จากนั้น หารายการที่ต้อง Update Result จาก CL_ORDER.BATCH_ID = BATCH_ID จากข้อ 2 AND CL_ORDER.ACTION_STATUS = 3 In Progress
 3. วนทำทีละ Record
    3.1 ดึงข้อมูลจาก table CL_ORDER_TREATMENT และ CL_ORDER เพื่อเก็บค่า ORDER_ID,BA_NO,MOBILE_NO,TREATMENT_ID,BATCH_ID ไว้ใน resultList ไว้สำหรับ Update CL_TREATMENT และ CL_BATCH โดยใช้ Query
