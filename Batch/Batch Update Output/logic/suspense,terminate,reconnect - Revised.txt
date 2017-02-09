@@ -1,0 +1,65 @@
+﻿1. หาไฟล์ .ok หรือ .err ใน NAS Path ที่ตกลงกัน
+2. อ่านชื่อไฟล์ Request (.dat) ที่ได้จาก Response File .ok หรือ .err
+Response File .ok หรือ .err จะมีชื่อไฟล์ .dat (ที่ Record Type 01) เพื่อให้ทราบว่าเป็น Response จากไฟล์ Request ใด
+	File Name: DMSRequest_20150817_232541.ok
+	01|DMSRequest_20150817_232541.dat  <--- ชื่อไฟล์ Request
+	02|0898705772|Suspend - Debt|Outgoing|001||3G|R1508004177949
+	02|0878158015|Suspend - Debt|Outgoing|001||3G|R1508004177950 
+	09|2
+(ต้องหาก่อนว่า ชื่อไฟล์ Request เดียวกัน มี Response File มาทั้ง .ok และ .err หรือไม่ เพราะถ้ามาทั้ง 2 ไฟล์ จะต้องนำทั้ง 2 ไฟล์ไปบันทึกผลต่อเนื่องกัน)
+นำชื่อไฟล์ไปหา CL_BATCH.BATCH_ID  โดยใช้ Query
+	SELECT B.BATCH_ID
+	FROM CL_BATCH B 
+	WHERE B.BATCH_FILE_NAME = 'DMSRequest_20150817_232541.dat' <--- ชื่อไฟล์ Request
+	AND B.INBOUND_STATUS = 1 (Pending)
+จากนั้น ให้ Update สถานะของ Inbound Status ว่าได้รับไฟล์แล้ว ดังนี้
+         	UPDATE CL_BATCH
+         	SET LAST_UPD=getdate(),
+         	LAST_UPD_BY='XXX' -- จะแจ้งอีกทีว่าให้ใช้ Username อะไรในกรณี Create/Update by System
+	RESPONSE_FILE_NAME = file success + file fail
+         	INBOUND_STATUS = 2 (Received) 
+         	INBOUND_STATUS_DTM =getdate(),
+         	WHERE BATCH_ID = ?
+(ไม่ต้อง Update BATCH_END_DTM เพราะเป็นวันเวลาเสร็จสิ้นการ Generate Batch File กรณี Outbound เท่านั้น)
+
+จากนั้น หารายการที่ต้อง Update Result จาก CL_ORDER.BATCH_ID = BATCH_ID จากข้อ 2 AND CL_ORDER.ACTION_STATUS = 3 In Progress
+3. วนทำทีละ Record
+   3.1 ดึงข้อมูลจาก table CL_ORDER_TREATMENT และ CL_ORDER เพื่อเก็บค่า ORDER_ID,BA_NO,MOBILE_NO,TREATMENT_ID,BATCH_ID ไว้ใน resultList ไว้สำหรับ Update CL_TREATMENT และ CL_BATCH โดยใช้ Query
+ 	SELECT A.ORDER_ID, A.BA_NO, A.MOBILE_NO, A.BATCH_ID, B.TREATMENT_ID
+	FROM CL_ORDER A, CL_ORDER_TREATMEMT B
+	WHERE A.ORDER_ID = B.ORDER_ID
+	AND A.ACTION_STATUS = 3 -- In Progress
+	AND A.BATCH_ID = ? จากข้อ 2
+   3.2 ตรวจสอบผลลัพธ์ที่ได้จากข้อ 3.1 ถ้ามากกว่า 1 record จึงทำขั้นตอนต่อไป
+  
+   3.3 ทำการ udpate action_status,ACTION_STATUS_DTM,SFF_ORDER_NO,ACTION_REMARK ใน Table CL_ORDER โดยใช้ Query
+  	UPDATE dbo.CL_ORDER
+  	SET LAST_UPD = getdate(),
+     	LAST_UPD_BY ='XXX' -- จะแจ้งอีกทีว่าให้ใช้ Username อะไรในกรณี Create/Update by System
+      	ACTION_STATUS = 4 (จากไฟล์ Success),6(จากไฟล์ Fail),
+      	ACTION_REMARK = error (จากไฟล์ Fail),
+      	ACTION_STATUS_DTM =getdate(),
+      	SFF_ORDER_NO = จากไฟล์
+   	WHERE MOBILE_NO = จากไฟล์
+
+4.เมื่อทำทุกไฟล์และทุก record แล้ว จึง update CL_TREATMENT และ CL_BATCH
+   4.1 ขั้นตอนการ update CL_TREATMENT
+	4.1.1 ทำการวนลูปข้อมูล TREATMENT_ID ที่ได้จากข้อ 3.1 เพื่อตรวจสอบว่าทั้ง TREATMENT_ID เพื่อหา summaryResult 
+		summaryResult = 4 (เมื่อทั้ง TREATMENT_ID มี ACTION_STATUS เท่ากับ 4 ทั้งหมด) >> Complete ทุกรายการ
+		summaryResult = 6 (เมื่อทั้ง TREATMENT_ID มี ACTION_STATUS เท่ากับ 4 อย่างน้อย 1 รายการ) >> Complete บางส่วน
+		summaryResult = 5 (เมื่อทั้ง TREATMENT_ID มี ACTION_STATUS เท่ากับ 5 ทั้งหมด) >> Failed ทุกรายการ
+	4.1.2 ทำการ update CL_TREATMENT
+         		UPDATE dbo.CL_TREATMENT
+         		SET LAST_UPD=getdate(),
+         		LAST_UPD_BY ='XXX' -- จะแจ้งอีกทีว่าให้ใช้ Username อะไรในกรณี Create/Update by System
+         		ACTION_STATUS = summaryResult  (ค่าจากข้อ 4.1.1),
+         		ACTION_STATUS_DTM =getdate(),
+         		WHERE TREATMENT_ID = จากข้อ 3.1
+   4.2 ขั้นตอนการ update CL_BATCH ว่าบันทึกผลลัพธ์ตาม Response File เรียบร้อยแล้ว 
+         		UPDATE CL_BATCH
+         		SET LAST_UPD=getdate(),
+         		LAST_UPD_BY='XXX' -- จะแจ้งอีกทีว่าให้ใช้ Username อะไรในกรณี Create/Update by System
+         		INBOUND_STATUS = 3 (Complete) 
+         		INBOUND_STATUS_DTM =getdate(),
+         		WHERE BATCH_ID = ? จากข้อ 2
+

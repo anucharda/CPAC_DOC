@@ -1,0 +1,52 @@
+﻿1. หาไฟล์ .sync
+2. อ่านชื่อไฟล์ที่ได้จาก .sync
+
+3. วนทำทีละ Record
+   3.1 ดึงข้อมูลจาก table CL_ORDER_TREATMENT และ CL_ORDER เพื่อเก็บค่า ORDER_ID,BA_NO,MOBILE_NO,TREATMENT_ID,BATCH_ID ไว้ใน resultList ไว้สำหรับ Update CL_TREATMENT และ CL_BATCH โดยใช้ Query
+   SELECT a.ORDER_ID,BA_NO,MOBILE_NO,TREATMENT_ID,BATCH_ID
+   FROM CL_ORDER_TREATMENT a
+   INNER JOIN dbo.CL_ORDER b
+   ON a.ORDER_ID=b.ORDER_ID
+   WHERE MOBILE_NO =?-> จากไฟล์
+   and ORDER_ACTION_ID = 3 (suspend),4 (terminate),12 (reconnect)
+   and ACTION_STATUS=3 (inProgress)
+   3.2 ตรวจสอบผลลัพธ์ที่ได้จากข้อ 3.1 ถ้ามากกว่า 1 record จะถือว่า  write log error และจบการทำงาน
+   3.3 ทำการ udpate action_status,ACTION_STATUS_DTM,SFF_ORDER_NO,ACTION_REMARK ใน Table CL_ORDER โดยใช้ Query
+  UPDATE dbo.CL_ORDER
+  SET LAST_UPD=getdate(),
+      LAST_UPD_BY=updateSuspendOrderSuccess,
+      ACTION_STATUS = 4 (จากไฟล์ Success),6(จากไฟล์ Fail),
+      ACTION_REMARK = error (จากไฟล์ Fail),
+      ACTION_STATUS_DTM =getdate(),
+      SFF_ORDER_NO = จากไฟล์
+   WHERE ORDER_ID = จากข้อ 3.1
+
+4.เมื่อทำทุกไฟล์และทุก record ในไฟล์ .sync จะขั้นตอนการ update CL_TREATMENT และ CL_BATCH
+   4.1 ขั้นตอนการ update CL_TREATMENT
+	4.1.1 ทำการวนลูปข้อมูล TREATMENT_ID ที่ได้จากข้อ 3.1 เพื่อตรวจสอบว่าทั้ง TREATMENT_ID เพื่อหา summaryResult
+         		summaryResult = 4 (เมื่อทั้ง TREATMENT_ID มี ACTION_STATUS เท่ากับ 4 ทั้งหมด)
+         		summaryResult = 6 (เมื่อทั้ง TREATMENT_ID มี ACTION_STATUS เท่ากับ 6 ทั้งหมด)
+         		summaryResult = 5 (เมื่อทั้ง TREATMENT_ID มี ACTION_STATUS เท่ากับ 6 และ 4 หรือ status อื่นๆ)	
+	4.1.2 ทำการ update CL_TREATMENT
+         		UPDATE dbo.CL_TREATMENT
+         		SET LAST_UPD=getdate(),
+         		LAST_UPD_BY=update suspend treatment (suspend),update terminate treatment (terminate),update reconnect treatment (reconnect)
+         		ACTION_STATUS = summaryResult  (ค่าจากข้อ 4.1.2),
+         		ACTION_STATUS_DTM =getdate(),
+         		WHERE TRETEMENT_ID = จากข้อ 3.1
+   4.2 ขั้นตอนการ update CL_BATCH
+	4.2.1 ทำการวนลูปข้อมูล BATCH_ID ที่ได้จากข้อ 3.1 เพื่อตรวจสอบว่าทั้ง BATCH_ID เพื่อหา summaryResult
+         		summaryResult = 4 (เมื่อทั้ง BATCH_ID มี ACTION_STATUS เท่ากับ 4 ทั้งหมด)
+         		summaryResult = 6 (เมื่อทั้ง BATCH_ID มี ACTION_STATUS เท่ากับ 6 ทั้งหมด)
+         		summaryResult = 5 (เมื่อทั้ง BATCH_ID มี ACTION_STATUS เท่ากับ 6 และ 4 หรือ status อื่นๆ)	
+	4.2.2 ทำการ update CL_BATCH
+         		UPDATE dbo.CL_BATCH
+         		SET LAST_UPD=getdate(),
+         		LAST_UPD_BY=update suspend treatment (suspend),update terminate treatment (terminate),update reconnect treatment (reconnect)
+		BATCH_END_DTM =getdate(),
+		RESPONSE_FILE_NAME = file success + file fail
+         		INBOUND_STATUS = summaryResult  (ค่าจากข้อ 4.2.1),
+         		INBOUND_STATUS_DTM =getdate(),
+         		WHERE BATCH_ID = จากข้อ 3.1
+
+	
