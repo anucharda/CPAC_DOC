@@ -1,0 +1,9 @@
+LOGIN 
+user : root
+pwd : sybase@123
+	 
+cd /opt/sap/
+. SYBASE.sh 
+startserver -f ASE-16_0/install/RUN_cpac
+
+
