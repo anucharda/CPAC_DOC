@@ -1,0 +1,5 @@
+01|DMSRequest_20170214_081519.dat
+02|0810815000|Reconnect - Debt|Outgoing|1309||EB0036 : Reconnect - Debt not allow because It has Pending Order OrderNo: R1702008858618  OrderType: Change Promotion
+02|0843588808|Reconnect - Debt|Outgoing|1309||EB0090 : Cannot create order Reconnect - Debt while mobile# 0843588808 is Active.
+02|0616241494|Reconnect - Debt|Outgoing|1309||EB0090 : Cannot create order Reconnect - Debt while mobile# 0616241494 is Active.
+09|3
