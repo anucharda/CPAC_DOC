@@ -66,7 +66,8 @@ WHERE B.COMPANY_CODE='AIS'
 AND A.ASSIGN_CODE='SUS'
 AND GC.AGENT_COMPANY_CODE || R.REGION_CODE = 'TEST TESTLE' -- Criteria จากหน้าจอ เช่น ARN|CB, SWP|CW, ANP|SU (ไม่แน่ใจว่าจากหน้าจอจะ Concate String ส่งค่ามาแบบนี้หรือไม่ )
 AND ( J.JOB_ASSIGN_DATE >=DATEADD(DAY, -10, getdate())  AND J.JOB_ASSIGN_DATE <= getdate() ) -- Criteria จาหหน้าจอ (Date)
-
+ORDER BY GC.AGENT_COMPANY_CODE ||' ('|| GC.AGENT_COMPANY_NAME ||')',A.ASSIGN_CODE,R.REGION_CODE ||' ('|| R.REGION_NAME || ')',P.PROVINCE_CODE ||' ('|| P.PROVINCE_NAME ||')',J.JOB_ASSIGN_DATE ,J.JOB_UNASSIGN_DATE,B.COMPANY_CODE,
+B.BA_NO
 
 
 --Detail
