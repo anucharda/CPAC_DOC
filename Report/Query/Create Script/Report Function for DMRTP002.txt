@@ -1,0 +1,140 @@
+CREATE OR REPLACE FUNCTION dbo.CL_F_GET_SALES_CHANNEL_BY_BA (@BA_NO VARCHAR(30) ) RETURNS varchar(30) 
+as 
+ begin
+    declare @SALES_CHANNEL varchar(30)       
+            set rowcount 1
+            SELECT @SALES_CHANNEL = SC.SALES_CHANNEL--,M.BA_NO
+            FROM CPDB.dbo.SFF_CONTRACT SC, CL_MOBILE_INFO M
+            WHERE SC.ASSET_ID = M.SFF_ASSET_INSTANCE_ID
+            AND M.BA_NO = @BA_NO
+            AND SC.STATUS_CD <> 'Deleted'
+            ORDER BY START_DT DESC
+            return  @SALES_CHANNEL 
+END
+
+CREATE OR REPLACE FUNCTION dbo.CL_F_GET_SUPER_DEAL_FLAG_BY_BA (@BA_NO VARCHAR(30) ) RETURNS varchar(1) 
+as 
+ begin
+    declare @SUPER_DEAL_FLAG varchar(30)       
+            set rowcount 1
+            SELECT @SUPER_DEAL_FLAG = CASE WHEN SC.PROJECT_NAME LIKE '%Super Deal%' THEN 'Y' ELSE 'N' END --,M.BA_NO
+            FROM CPDB.dbo.SFF_CONTRACT SC, CL_MOBILE_INFO M
+            WHERE SC.ASSET_ID = M.SFF_ASSET_INSTANCE_ID
+            AND M.BA_NO = @BA_NO
+            AND SC.STATUS_CD <> 'Deleted'
+            ORDER BY START_DT DESC
+            return  @SUPER_DEAL_FLAG 
+END
+
+CREATE OR REPLACE FUNCTION dbo.CL_F_GET_TOP_BRAND_BY_BA (@BA_NO VARCHAR(30) ) RETURNS varchar(30) 
+as 
+ begin
+    declare @TOP_BRAND varchar(30)       
+            set rowcount 1
+            SELECT @TOP_BRAND = SC.BRAND --,M.BA_NO
+            FROM CPDB.dbo.SFF_CONTRACT SC, CL_MOBILE_INFO M
+            WHERE SC.ASSET_ID = M.SFF_ASSET_INSTANCE_ID
+            AND M.BA_NO = @BA_NO
+            AND SC.STATUS_CD <> 'Deleted'
+            ORDER BY START_DT DESC
+            return  @TOP_BRAND 
+END
+
+CREATE OR REPLACE FUNCTION dbo.CL_F_GET_TOP_MODEL_BY_BA (@BA_NO VARCHAR(30) ) RETURNS varchar(30) 
+as 
+ begin
+    declare @TOP_MODEL varchar(30)       
+            set rowcount 1
+                SELECT @TOP_MODEL =  SC.MODEL--,BA_NO
+                FROM CPDB.dbo.SFF_CONTRACT SC, CL_MOBILE_INFO M
+                WHERE SC.ASSET_ID = M.SFF_ASSET_INSTANCE_ID
+                AND M.BA_NO = @BA_NO 
+                AND SC.STATUS_CD <> 'Deleted'
+                ORDER BY START_DT DESC
+            return  @TOP_MODEL 
+END
+
+
+CREATE OR REPLACE FUNCTION dbo.CL_F_GET_TOP_IMEI_BY_BA (@BA_NO VARCHAR(30) ) RETURNS varchar(30) 
+as 
+ begin
+    declare @TOP_IMEI varchar(30)       
+            set rowcount 1
+            SELECT @TOP_IMEI =  SC.IMEI --,M.BA_NO
+            FROM CPDB.dbo.SFF_CONTRACT SC, CL_MOBILE_INFO M
+            WHERE SC.ASSET_ID = M.SFF_ASSET_INSTANCE_ID
+            AND M.BA_NO = @BA_NO
+            AND SC.STATUS_CD <> 'Deleted'
+            ORDER BY START_DT DESC
+            return  @TOP_IMEI 
+END
+
+
+
+CREATE OR REPLACE FUNCTION dbo.CL_F_GET_BALANCE_CONTRACT_BY_BA (@BA_NO VARCHAR(30) ) RETURNS int
+as 
+ begin
+    declare @BALANCE_CONTRACT int  
+            set rowcount 1
+            SELECT  
+            @BALANCE_CONTRACT = CASE WHEN SC.BREAK_DT IS NOT NULL THEN DATEDIFF(MM, SC.BREAK_DT, SC.END_DT) 
+            ELSE CASE WHEN CURRENT_DATE() <= SC.END_DT THEN DATEDIFF(MM, CURRENT_DATE(), SC.END_DT) ELSE 0 END
+            END--,M.BA_NO
+            -- ถ้า Break สัญญาแล้ว นับเดือนจากวันที่ Break จนถึงวันที่สิ้นสุดสัญญา แต่ถ้าไม่มีการ Break สัญญา จะนับเดือนเฉพาะกรณีที่วันนี้ยังไม่ครบกำหนดของสัญญา
+            FROM CPDB.dbo.SFF_CONTRACT SC, CL_MOBILE_INFO M
+            WHERE SC.ASSET_ID = M.SFF_ASSET_INSTANCE_ID
+            AND M.BA_NO = @BA_NO
+            AND SC.STATUS_CD <> 'Deleted'
+            ORDER BY START_DT DESC
+            return  @BALANCE_CONTRACT 
+END
+
+
+
+
+CREATE FUNCTION dbo.CL_F_GET_MOBILE_REF_BY_BA (@BA_NO varchar(30)) RETURNS varchar(30) 
+as 
+BEGIN
+    declare @ba_status varchar(30)      
+    declare @mobileref varchar(30)      
+
+                select @ba_status = BA_STATUS 
+                from CL_BA_INFO 
+                where BA_NO = @BA_NO
+                IF @ba_status = 'Active'
+                    BEGIN
+                        select @mobileref  = a1.MOBILE_NO
+                        from CL_MOBILE_INFO a1
+                        where a1.BA_NO = @BA_NO
+                        and a1.MOBILE_STATUS_DTM = ( 
+                        select max(a2.MOBILE_STATUS_DTM) from CL_MOBILE_INFO a2
+                       where a2.BA_NO = a1.BA_NO
+                        and ( a2.MOBILE_STATUS = 'Active' or a2.MOBILE_STATUS like 'Suspend%' ) 
+                        )
+                    END
+                ELSE 
+                    BEGIN
+                        select @mobileref  = a1.MOBILE_NO
+                        from CL_MOBILE_INFO a1
+                        where a1.BA_NO = @BA_NO
+                        and a1.MOBILE_STATUS_DTM = ( 
+                        select max(a2.MOBILE_STATUS_DTM) from CL_MOBILE_INFO a2
+                        where a2.BA_NO = a1.BA_NO
+                        )
+                    END
+                return  @mobileref 
+END
+GO
+
+CREATE FUNCTION dbo.CL_F_GET_MOBILE_STATUS(@ba_no varchar(30) ,@mobile_no varchar(30)) RETURNS varchar(100)
+as 
+ begin
+    declare @mobile_status  varchar(100)
+                SELECT @mobile_status = ISNULL(MOBILE_STATUS,'-')
+                from CL_MOBILE_INFO
+                where BA_NO = @ba_no 
+                and MOBILE_NO = @mobile_no
+                return  @mobile_status 
+END
+GO
+

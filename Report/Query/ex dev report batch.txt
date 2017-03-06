@@ -1,0 +1,82 @@
+REPORT_JOB_ID     REPORT_JOB_NAME         REPORT_JOB_TYPE     REPORT_JOB_START_DTM     REPORT_JOB_END_DTM     REPORT_JOB_FILE_NAME                    REPORT_JOB_STATUS     REPORT_JOB_CONDITION                                                                              CREATED               CREATED_BY     LAST_UPD     LAST_UPD_BY     NOTIFY_EMAILS    
+ ----------------  ----------------------  ------------------  -----------------------  ---------------------  --------------------------------------  --------------------  ------------------------------------------------------------------------------------------------  --------------------  -------------  -----------  --------------  ---------------- 
+ 1                 BLACKLIST_TYPE_SUBTYPE  0                   2/14/2017 2:29:15 PM     (null)                 BL_TYPE_SUBTYPE-20170214023032954I.csv  0                     {groupCategory: '1', category: '1', subCategory: '0', blacklistType: '0', blacklistSubType: '0'}  2/14/2017 2:30:32 PM  ICE            2:30:32 PM   ICE             (null)           
+ 
+ 
+ Back End Service
+ 
+ http://10.252.65.4:8180/CpacReport/services/reportJobService/addReportJob
+ 
+ <addReportJobRequest>
+	<requestHeader>
+		<uid>ICE</uid>
+	</requestHeader>
+	<reportJobDto>
+		<reportJobType>BLACKLIST_TYPE_SUBTYPE</reportJobType>
+		<reportJobStartDtm>2017-02-14T14:29:15.135+07:00</reportJobStartDtm>
+		<reportJobCondition>{groupCategory: '1', category: '1', subCategory: '0', blacklistType: '0', blacklistSubType: '0'}</reportJobCondition>
+	</reportJobDto>
+</addReportJobRequest>
+
+condition ตามตัวอย่างนี้ใช้กับ class BlTypeSubTypeCondition นะครับ
+
+ขั้นตอนการ develop
+//-------- start ส่วน config path -------\\
+- เพิ่ม path ที่ report-config.properties ที่ CpacReportCommon
+ex.
+	dev.path.aging=E:/temp/test
+	sit.path.aging=E:/temp/test
+	prod.path.aging=E:/temp/test
+	
+- เพิ่มการดึงข้อมูลที่ ConstantCacheUtils
+	เพิ่ม property ของ path ที่เราเพิ่ม
+	ex. private String agingPath;		//path.aging
+	เพิ่มการ load properties
+	ex. this.agingPath = rrb.getString(environmentType.getValue() + ".path.aging");
+	เพิ่ม getter
+	ex. public String getAgingPath() {
+			return agingPath;
+		}
+
+- จากนั้นเวลาจะใช้ path ก็ให้เรียกใช้จาก ConstantCacheUtils ผ่าน getter ที่เราสร้างไว้เลยครับ
+//-------- end ส่วน assign -------\\
+
+//-------- start ส่วน assign -------\\
+- สร้าง class condition ที่ CpacReportCommon นะครับ  
+เพื่อให้ทางหน้าบ้านเก็บ condition ตรงตามที่เราต้องการ
+และเพื่อให้ตัวกลางจัดการเรื่องการ serialize/deserialize ระหว่าง java กับ json ให้ครับ
+
+- เพิ่ม report type ที่ enum ReportJobType ตามแต่ละรีพอร์ต (ตั้งชื่อเองเลยนะครับ  แค่ให้สื่อ  และเรียงลำดับอย่าสลับกันนะครับ  เพราะตัวกลางใช้ ordinal ในการค้นหา)
+
+- สร้าง class thread impl ที่ package th.co.ais.cpac.cl.report.runner.thread.impl ให้ extend JobWorkerThread<T>  T = class condition
+bind code ที่ constructor ตามตัวอย่าง BlacklistTypeSubTypeImpl นะครับ
+และ implement ที่ method implement ให้ไปเรียก business service (spring ส่วนเขียนไฟล์)
+
+- นำ class ที่สร้างในข้อก่อนหน้า  ไปเพิ่ม case การ assign ที่ JobAssignImpl
+ex.
+case BLACKLIST_TYPE_SUBTYPE :
+	{
+		BlacklistTypeSubTypeImpl impl = new BlacklistTypeSubTypeImpl(getContext(), jobDto);
+
+		impl.start();
+	}
+	break;
+//-------- end ส่วน assign -------\\
+
+//-------- start ส่วน  business -------\\
+- สร้าง business service extend CsvExporterBase
+สร้าง interfaces method run เพื่อเริ่มการทำงาน
+ex.
+public String run(BlTypeSubTypeCondition condition, String fileName, String uid) throws Exception
+
+- implement method protected String getFilePath() {  เพื่อกำหนด path output
+
+- public String getFileName() {  ไม่ได้ใช้  ย้ายไปใช้กำหนดชื่อไฟลืที่ enum reportType
+
+- implement method protected int getTotalColumn() { เพื่อให้ตัวกลางเกี่ยวกับการขึ้นบรรทัดใหม่รู้ว่าหมดบรรทัดแล้ว (ถ้าไม่ได้ใช้ตัวกลาง method skipColumn, skipToEndLine ก็ไม่จำเป็นต้องทำอะไรที่ method นี้  ให้ return -1)
+
+- implement dao สำหรับใช้ในการคิวรี่ข้อมูล
+
+- implement method protected void implementAppendData() throws Exception {  เพื่อเริ่มการเขียนไฟล์
+
+//-------- end ส่วน  business -------\\

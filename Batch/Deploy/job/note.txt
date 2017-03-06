@@ -1,0 +1,16 @@
+แก้ไข properties ใน code
+- cpac_collection_common.jar -> cpac_collection_common.jar\th\co\ais\cpac\cl\common 
+  -> File log4j.properties
+- cpac_receive_Result.jar ->cpac_receive_result.jar\th\co\ais\cpac\cl\batch\properties
+  -> File resource.properties
+
+File Conf ย้าย *.conf ไปไว้ใน path ที่ระบุใน .properties
+-> database.properties -> แก้ไข IP DB
+-> system.conf -> แก้ไข path inbound
+
+File *.sh
+-> แก้ไข path java
+-> แก้ไข path lib
+
+แก้ไข path db ,system
+- receive -> resource.properties
