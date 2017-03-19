@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 #export JAVA_HOME=/root/java/jdk1.8.0_21
 #export PATH=$JAVA_HOME/bin
 export LIB=/home/jbossadm/Collection/UpdateStatus/lib
@@ -17,4 +16,4 @@ done
 
 echo $CLASSPATH
 
-java -cp ".:${CLASSPATH}" th.co.ais.cpac.cl.batch.cmd.updatesffresult.ReceiveSFFWorker RC
+java -cp ".:${CLASSPATH}" th.co.ais.cpac.cl.batch.cmd.blacklist.ReceiveBlackListWorker BL

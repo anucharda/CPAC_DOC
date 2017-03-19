@@ -1,8 +1,8 @@
 #!/bin/bash
 
-export JAVA_HOME=/usr/local/java
-export PATH=$JAVA_HOME/bin
-export LIB=/cpac/lib
+#export JAVA_HOME=/root/java/jdk1.8.0_21
+#export PATH=$JAVA_HOME/bin
+export LIB=/home/jbossadm/Collection/UpdateStatus/lib
 
 export LC_ALL=th_TH.TIS-620
 

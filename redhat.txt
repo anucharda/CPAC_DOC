@@ -7,3 +7,16 @@ cd /opt/sap/
 startserver -f ASE-16_0/install/RUN_cpac
 
 
+
+IP บนเครื่อง : 10.239.111.129
+Dev Env
+IP : 10.252.65.9
+username : jbossadm
+password : password
+path : /home/jbossadm/Collection/UpdateStatus/bin
+
+DB Env
+IP : 10.252.65.39
+username : collection
+password : password
+
