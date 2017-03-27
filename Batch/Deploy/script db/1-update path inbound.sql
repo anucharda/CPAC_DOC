@@ -1,0 +1,26 @@
+UPDATE CL_BATCH_PATH
+set PATH_INBOUND='xxx'
+where BATCH_TYPE_ID=1 --Suspend
+
+UPDATE CL_BATCH_PATH
+set PATH_INBOUND='xxx'
+where BATCH_TYPE_ID=2 --Terminate
+
+UPDATE CL_BATCH_PATH
+set PATH_INBOUND='xxx'
+where BATCH_TYPE_ID=4 --Reconnect
+
+UPDATE CL_BATCH_PATH
+set PATH_INBOUND='xxx'
+where BATCH_TYPE_ID=19 --Waive Batch
+
+UPDATE CL_BATCH_PATH
+set PATH_INBOUND='xxx'
+where BATCH_TYPE_ID=7 --Write Off
+
+
+UPDATE CL_BATCH_PATH
+set PATH_INBOUND='xxx'
+where BATCH_TYPE_ID=5 --Blacklist
+
+
