@@ -12,7 +12,7 @@ CREATE TABLE dbo.CL_TMP_EXEMPT_CREDIT_LIMIT (
 	END_DATE            datetime NOT NULL,
 	EXPIRED_DATE        datetime NOT NULL,
 	DURATION            int NOT NULL,	
-	LOCATION_CODE		varchar(30) NOT NULL,	
+	LOCATION_CODE		UNSIGNED BIGINT  NOT NULL,
 	REASON				varchar(30) NOT NULL,	
     WORK_ORDER_ID       varchar(50) NULL,
     GEN_FLAG            char(1) DEFAULT     'N' NOT NULL,
