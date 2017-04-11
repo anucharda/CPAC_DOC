@@ -20,3 +20,17 @@ IP : 10.252.65.39
 username : collection
 password : password
 
+
+
+======SIT Environment=======
+Dev Env
+IP : 10.252.65.16
+username : jbossadm
+password : password
+path : /home/jbossadm/Collection/UpdateStatus/bin
+
+
+DB Env
+IP : 10.252.65.39 ,5010
+username : collection
+password : password
