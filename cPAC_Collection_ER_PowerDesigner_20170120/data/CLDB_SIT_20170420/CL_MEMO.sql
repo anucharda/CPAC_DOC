@@ -1,0 +1,37 @@
+CREATE TABLE dbo.CL_MEMO  ( 
+	MEMO_ID          	UNSIGNED BIGINT IDENTITY NOT NULL,
+	MEMO_TYPE_ID     	UNSIGNED BIGINT NOT NULL,
+	MEMO_DATE        	date NOT NULL,
+	MEMO_CODE        	varchar(20) NOT NULL,
+	MEMO_COMPANY     	varchar(50) NOT NULL,
+	MEMO_ATTN_ID     	UNSIGNED BIGINT NOT NULL,
+	MEMO_CC          	varchar(100) NULL,
+	MEMO_SUBJECT     	varchar(200) NOT NULL,
+	MEMO_MSG_1       	varchar(500) NOT NULL,
+	MEMO_MSG_2       	varchar(500) NULL,
+	MEMO_MSG_3       	varchar(500) NULL,
+	MEMO_MSG_4       	varchar(500) NULL,
+	MEMO_MSG_5       	varchar(500) NULL,
+	MEMO_POSTSCRIPT  	varchar(150) NULL,
+	MEMO_FROM        	varchar(100) NULL,
+	MEMO_DEVISION    	varchar(100) NULL,
+	MEMO_CONTACT     	varchar(100) NULL,
+	MEMO_STATUS      	smallint NOT NULL,
+	MEMO_APPROVER_ID 	UNSIGNED BIGINT NULL,
+	MEMO_APPROVE_DATE	date NULL,
+	MEMO_REMARK      	varchar(200) NULL,
+	CREATED          	datetime NOT NULL,
+	CREATED_BY       	varchar(50) NOT NULL,
+	LAST_UPD         	datetime NULL,
+	LAST_UPD_BY      	varchar(50) NULL 
+	)
+LOCK DATAROWS
+GO
+SET IDENTITY_INSERT dbo.CL_MEMO ON
+
+GO
+
+SET IDENTITY_INSERT dbo.CL_MEMO OFF
+
+GO
+

@@ -1,0 +1,35 @@
+CREATE TABLE dbo.CL_LAWSUIT  ( 
+	LAWSUIT_ID           	UNSIGNED BIGINT IDENTITY NOT NULL,
+	LAWSUIT_CODE         	varchar(10) NOT NULL,
+	LAWSUIT_STATUS       	smallint NOT NULL,
+	LAWSUIT_REMARK       	varchar(400) NULL,
+	COURT_ID             	UNSIGNED BIGINT NULL,
+	LAWYER_ID            	UNSIGNED BIGINT NULL,
+	FILING_DATE          	date NULL,
+	FILING_CODE          	varchar(40) NULL,
+	FILING_CAPITAL       	decimal(14,2) NULL,
+	HEARING_DATE         	date NULL,
+	CONCILIATION_DATE    	date NULL,
+	JUDGEMENT_DATE       	date NULL,
+	JUDGEMENT_CODE       	varchar(40) NULL,
+	JUDGEMENT_RESULT     	smallint NULL,
+	JUDGEMENT_DESC       	varchar(400) NULL,
+	EXECUTION_DATE       	date NULL,
+	EXECUTION_METHOD_ID  	UNSIGNED BIGINT NULL,
+	EXECUTION_RESULT     	smallint NULL,
+	EXECUTION_RESULT_DESC	varchar(400) NULL,
+	CREATED              	datetime NOT NULL,
+	CREATED_BY           	varchar(50) NOT NULL,
+	LAST_UPD             	datetime NULL,
+	LAST_UPD_BY          	varchar(50) NULL 
+	)
+LOCK DATAROWS
+GO
+SET IDENTITY_INSERT dbo.CL_LAWSUIT ON
+
+GO
+
+SET IDENTITY_INSERT dbo.CL_LAWSUIT OFF
+
+GO
+

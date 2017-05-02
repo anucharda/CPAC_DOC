@@ -1,0 +1,12 @@
+CREATE TABLE dbo.CL_LEGAL_COMPLAINT_MOBILE  ( 
+	LEGAL_COMPLAINT_ID	UNSIGNED BIGINT NOT NULL,
+	MOBILE_NO         	varchar(30) NOT NULL,
+	APPROVE_BOO       	char(1) NOT NULL,
+	APPROVE_REMARK    	varchar(200) NULL,
+	CREATED           	datetime NOT NULL,
+	CREATED_BY        	varchar(50) NOT NULL,
+	LAST_UPD          	datetime NULL,
+	LAST_UPD_BY       	varchar(50) NULL 
+	)
+LOCK DATAROWS
+GO

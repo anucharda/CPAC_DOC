@@ -34,3 +34,9 @@ DB Env
 IP : 10.252.65.39 ,5010
 username : collection
 password : password
+
+
+
+
+export JAVA_HOME=/opt/jdk1.8.0_121
+export PATH=$JAVA_HOME/bin

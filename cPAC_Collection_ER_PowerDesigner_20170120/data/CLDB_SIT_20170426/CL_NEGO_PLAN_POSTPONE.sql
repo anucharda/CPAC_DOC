@@ -1,0 +1,14 @@
+CREATE TABLE dbo.CL_NEGO_PLAN_POSTPONE  ( 
+	NEGO_ID           	UNSIGNED BIGINT NOT NULL,
+	INST_NO           	smallint NOT NULL,
+	POSTPONE_SEQ      	smallint NOT NULL,
+	POSTPONE_REASON_ID	UNSIGNED BIGINT NOT NULL,
+	FR_INST_FAIL_DATE 	date NOT NULL,
+	TO_INST_FAIL_DATE 	date NOT NULL,
+	CREATED           	datetime NOT NULL,
+	CREATED_BY        	varchar(50) NOT NULL,
+	LAST_UPD          	datetime NULL,
+	LAST_UPD_BY       	varchar(50) NULL 
+	)
+LOCK DATAROWS
+GO

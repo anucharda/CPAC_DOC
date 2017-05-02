@@ -1,0 +1,13 @@
+CREATE TABLE dbo.CL_EXEMPT_LEVEL  ( 
+	ACTION_ID        	UNSIGNED BIGINT NOT NULL,
+	EXEMPT_LEVEL     	smallint NOT NULL,
+	EFFECT_START_DATE	date NOT NULL,
+	EFFECT_END_DATE  	date NULL,
+	RECORD_ORDER     	int DEFAULT   0 NOT NULL,
+	CREATED          	datetime NOT NULL,
+	CREATED_BY       	varchar(50) NOT NULL,
+	LAST_UPD         	datetime NULL,
+	LAST_UPD_BY      	varchar(50) NULL 
+	)
+LOCK DATAROWS
+GO

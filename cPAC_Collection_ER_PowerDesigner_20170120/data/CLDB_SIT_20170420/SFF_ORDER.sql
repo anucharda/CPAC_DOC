@@ -1,0 +1,5 @@
+CREATE TABLE dbo.SFF_ORDER  ( 
+	ROW_ID	varchar(50) NOT NULL 
+	)
+LOCK DATAROWS
+GO

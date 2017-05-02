@@ -1,0 +1,5 @@
+CREATE TABLE dbo.S_ORG_EXT  ( 
+	ROW_ID	varchar(50) NOT NULL 
+	)
+LOCK DATAROWS
+GO

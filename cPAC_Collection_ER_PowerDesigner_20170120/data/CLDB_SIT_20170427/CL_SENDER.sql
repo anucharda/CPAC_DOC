@@ -1,0 +1,17 @@
+CREATE TABLE dbo.CL_SENDER  ( 
+	SENDER_TYPE      	smallint NOT NULL,
+	COMPANY_CODE     	varchar(50) NOT NULL,
+	PRODUCT_TYPE_ID  	UNSIGNED BIGINT NOT NULL,
+	SMS_SENDER       	varchar(50) NOT NULL,
+	EMAIL_SENDER     	varchar(100) NOT NULL,
+	SENDER_REMARK    	varchar(200) NULL,
+	SENDER_PRIORITY  	smallint DEFAULT   0 NOT NULL,
+	EFFECT_START_DATE	date NOT NULL,
+	EFFECT_END_DATE  	date NULL,
+	CREATED          	datetime NOT NULL,
+	CREATED_BY       	varchar(50) NOT NULL,
+	LAST_UPD         	datetime NULL,
+	LAST_UPD_BY      	varchar(50) NULL 
+	)
+LOCK DATAROWS
+GO
